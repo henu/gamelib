@@ -43,6 +43,11 @@ bool GameObject::handleHitscan(Urho3D::Vector3 const& pos, Urho3D::Vector3 const
     return false;
 }
 
+void GameObject::handleExplosion(Urho3D::Vector3 const& pos)
+{
+    (void)pos;
+}
+
 Urho3D::Matrix3x4 GameObject::getCameraTransform() const
 {
     return Urho3D::Matrix3x4::IDENTITY;
@@ -71,6 +76,22 @@ bool GameObject::hitscan(Urho3D::Vector3& result_hitpos, Urho3D::Ray const& ray)
     }
 
     return false;
+}
+
+void GameObject::explosion(Urho3D::Vector3 const& pos)
+{
+    // Iterate all objects in Scene
+    Urho3D::PODVector<Urho3D::Node*> nodes = GetScene()->GetChildren(false);
+    for (unsigned i = 0; i < nodes.Size(); ++ i) {
+        Urho3D::Node* node = nodes[i];
+        for (unsigned j = 0; j < node->GetNumComponents(); ++ j) {
+            Urho3D::Component* component = node->GetComponents()[j];
+            GameObject* gameobj = dynamic_cast<GameObject*>(component);
+            if (gameobj) {
+                gameobj->handleExplosion(pos);
+            }
+        }
+    }
 }
 
 }

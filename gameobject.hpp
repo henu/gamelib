@@ -30,9 +30,13 @@ public:
 
     virtual bool handleHitscan(Urho3D::Vector3 const& pos, Urho3D::Vector3 const& dir);
 
+    virtual void handleExplosion(Urho3D::Vector3 const& pos);
+
     virtual Urho3D::Matrix3x4 getCameraTransform() const;
 
     bool hitscan(Urho3D::Vector3& result_hitpos, Urho3D::Ray const& ray);
+
+    void explosion(Urho3D::Vector3 const& pos);
 
 private:
 
