@@ -19,7 +19,8 @@ public:
 
     Urho3D::Scene* getScene();
 
-    virtual void initializeScene();
+    virtual void initializeSceneOnServer();
+    virtual void initializeSceneOnClient();
 
     virtual Urho3D::Node* createNodeAndGameObjectForPlayer();
 

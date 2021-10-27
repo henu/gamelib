@@ -42,6 +42,8 @@ GameState::GameState(App* app, Urho3D::Context* context, Urho3D::String const& h
     Urho3D::SoundListener* listener = camera_node->CreateComponent<Urho3D::SoundListener>();
     GetSubsystem<Urho3D::Audio>()->SetListener(listener);
 
+    app->initializeSceneOnClient();
+
     // Connect to server
     if (!GetSubsystem<Urho3D::Network>()->Connect(host, port, app->getScene())) {
         throw std::runtime_error("Unable to connect to server!");

@@ -45,7 +45,7 @@ ServerState::ServerState(App* app, Urho3D::Context* context, uint16_t port) :
     app->getScene()->CreateComponent<Urho3D::Octree>(Urho3D::LOCAL);
     app->getScene()->CreateComponent<Urho3D::PhysicsWorld>();
 
-    app->initializeScene();
+    app->initializeSceneOnServer();
 
     // Subscribe to events
     SubscribeToEvent(Urho3D::E_CLIENTCONNECTED, URHO3D_HANDLER(ServerState, handleClientConnected));

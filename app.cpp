@@ -55,7 +55,11 @@ Urho3D::Scene* App::getScene()
     return scene;
 }
 
-void App::initializeScene()
+void App::initializeSceneOnServer()
+{
+}
+
+void App::initializeSceneOnClient()
 {
 }
 
