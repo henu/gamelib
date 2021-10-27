@@ -27,6 +27,9 @@ public:
     virtual void getClientNetworkEvents(Urho3D::Vector<Urho3D::StringHash>& result);
     virtual void handleClientNetworkEvent(Urho3D::StringHash const& event_type, Urho3D::VariantMap& event_data);
 
+    virtual uint16_t getDefaultPort();
+    virtual Urho3D::String getDefaultHost();
+
 private:
 
     // Arguments from command line

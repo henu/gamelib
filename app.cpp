@@ -48,6 +48,10 @@ void App::Start()
     else if (arg_client_port > 0) {
         pushState(Urho3D::SharedPtr<GameState>(new GameState(this, context_, arg_client_host, arg_client_port)));
     }
+    // If no arguments are given, then connect to default server
+    else {
+        pushState(Urho3D::SharedPtr<GameState>(new GameState(this, context_, getDefaultHost(), getDefaultPort())));
+    }
 }
 
 Urho3D::Scene* App::getScene()
@@ -77,6 +81,16 @@ void App::handleClientNetworkEvent(Urho3D::StringHash const& event_type, Urho3D:
 {
     (void)event_type;
     (void)event_data;
+}
+
+uint16_t App::getDefaultPort()
+{
+    return 2345;
+}
+
+Urho3D::String App::getDefaultHost()
+{
+    return "localhost";
 }
 
 void App::readArguments()
@@ -134,12 +148,6 @@ void App::readArguments()
         arg_client_port = 0;
         arg_server_port = 0;
         throw;
-    }
-
-    // Use some defaults
-    if (arg_server_port <= 0 && arg_client_port <= 0) {
-        arg_client_port = 2345;
-        arg_client_host = "localhost";
     }
 }
 
