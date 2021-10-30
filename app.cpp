@@ -36,6 +36,10 @@ App::App(Urho3D::Context* context) :
 
 void App::Start()
 {
+    if (engine_->IsExiting()) {
+        return;
+    }
+
     Urho3D::SetRandomSeed(Urho3D::Time::GetSystemTime());
 
     scene = new Urho3D::Scene(context_);
@@ -145,6 +149,7 @@ void App::readArguments()
         }
     } catch (std::runtime_error const& err) {
         // In case of error, reset settings
+        arg_client_host.Clear();
         arg_client_port = 0;
         arg_server_port = 0;
         throw;
