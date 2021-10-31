@@ -6,7 +6,7 @@
 namespace GameLib
 {
 
-void readSceneFromDisk(Urho3D::Scene* scene, Urho3D::String const& path, bool enable_physics);
+void readSceneFromDisk(Urho3D::Scene* scene, Urho3D::String const& path, bool enable_physics = true);
 void writeSceneToDisk(Urho3D::Scene* scene, Urho3D::String const& path);
 
 }
