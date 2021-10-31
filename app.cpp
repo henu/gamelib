@@ -2,7 +2,9 @@
 
 #include "gamestate.hpp"
 #include "serverstate.hpp"
+#include "editorstate.hpp"
 
+#include <Urho3D/Graphics/Octree.h>
 #include <Urho3D/IO/Log.h>
 
 #include <stdexcept>
@@ -43,6 +45,7 @@ void App::Start()
     Urho3D::SetRandomSeed(Urho3D::Time::GetSystemTime());
 
     scene = new Urho3D::Scene(context_);
+    scene->CreateComponent<Urho3D::Octree>(Urho3D::LOCAL);
 
     // If server
     if (arg_server_port > 0) {
@@ -51,6 +54,10 @@ void App::Start()
     // If client
     else if (arg_client_port > 0) {
         pushState(Urho3D::SharedPtr<GameState>(new GameState(this, context_, arg_client_host, arg_client_port)));
+    }
+    // If scene editor
+    else if (!arg_editor_path.Empty()) {
+        pushState(Urho3D::SharedPtr<EditorState>(new EditorState(this, context_, arg_editor_path)));
     }
     // If no arguments are given, then connect to default server
     else {
@@ -109,8 +116,8 @@ void App::readArguments()
                 if (arg_server_port > 0) {
                     throw std::runtime_error("Duplicate \"listen\"!");
                 }
-                if (arg_client_port > 0) {
-                    throw std::runtime_error("Please select either \"listen\" or \"connect\"!");
+                if (arg_client_port > 0 || !arg_editor_path.Empty()) {
+                    throw std::runtime_error("Please select either \"listen\", \"connect\" or \"editor\"!");
                 }
                 if (args.Size() - i < 2) {
                     throw std::runtime_error("Missing port!");
@@ -126,8 +133,8 @@ void App::readArguments()
                 if (arg_client_port > 0) {
                     throw std::runtime_error("Duplicate \"connect\"!");
                 }
-                if (arg_server_port > 0) {
-                    throw std::runtime_error("Please select either \"listen\" or \"connect\"!");
+                if (arg_server_port > 0 || !arg_editor_path.Empty()) {
+                    throw std::runtime_error("Please select either \"listen\", \"connect\" or \"editor\"!");
                 }
                 if (args.Size() - i < 2) {
                     throw std::runtime_error("Missing hostname and port!");
@@ -142,6 +149,20 @@ void App::readArguments()
                 }
                 i += 2;
             }
+            // Scene editor
+            else if (arg == "editor") {
+                if (!arg_editor_path.Empty()) {
+                    throw std::runtime_error("Duplicate \"editor\"!");
+                }
+                if (arg_server_port > 0 || arg_client_port > 0) {
+                    throw std::runtime_error("Please select either \"listen\", \"connect\" or \"editor\"!");
+                }
+                if (args.Size() - i < 2) {
+                    throw std::runtime_error("Missing scene path!");
+                }
+                arg_editor_path = args[i + 1];
+                i += 1;
+            }
             // Unexpected argument
             else {
                 throw std::runtime_error("Invalid arguments!");
@@ -152,6 +173,7 @@ void App::readArguments()
         arg_client_host.Clear();
         arg_client_port = 0;
         arg_server_port = 0;
+        arg_editor_path.Clear();
         throw;
     }
 }

@@ -1,7 +1,7 @@
 #ifndef GAMELIB_GAMESTATE_HPP
 #define GAMELIB_GAMESTATE_HPP
 
-#include "../urhoextras/states/state.hpp"
+#include "scenerendererstate.hpp"
 
 #include <Urho3D/Scene/Scene.h>
 
@@ -10,7 +10,7 @@ namespace GameLib
 
 class App;
 
-class GameState : public UrhoExtras::States::State
+class GameState : public SceneRendererState
 {
 
 public:
@@ -22,14 +22,10 @@ public:
 
 private:
 
-    App* app;
-
     unsigned controlled_node_id;
 
     float yaw, pitch;
     bool get_yaw_and_pitch_from_gameobject;
-
-    void prepareSceneForRendering();
 
     void handleKeyDown(Urho3D::StringHash event_type, Urho3D::VariantMap& event_data);
     void handleUpdate(Urho3D::StringHash event_type, Urho3D::VariantMap& event_data);

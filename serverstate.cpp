@@ -7,7 +7,6 @@
 
 #include <Urho3D/Core/CoreEvents.h>
 #include <Urho3D/Graphics/Model.h>
-#include <Urho3D/Graphics/Octree.h>
 #include <Urho3D/Input/Input.h>
 #include <Urho3D/IO/Log.h>
 #include <Urho3D/Network/Network.h>
@@ -42,7 +41,6 @@ ServerState::ServerState(App* app, Urho3D::Context* context, uint16_t port) :
     #endif
 
     // Scene
-    app->getScene()->CreateComponent<Urho3D::Octree>(Urho3D::LOCAL);
     app->getScene()->CreateComponent<Urho3D::PhysicsWorld>();
 
     app->initializeSceneOnServer();

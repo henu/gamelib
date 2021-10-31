@@ -38,6 +38,8 @@ private:
     // For client
     Urho3D::String arg_client_host;
     int arg_client_port;
+    // For editor
+    Urho3D::String arg_editor_path;
 
     Urho3D::SharedPtr<Urho3D::Scene> scene;
 

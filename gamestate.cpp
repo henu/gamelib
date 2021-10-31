@@ -10,10 +10,7 @@
 #include <Urho3D/Core/CoreEvents.h>
 #include <Urho3D/Graphics/Camera.h>
 #include <Urho3D/Graphics/Graphics.h>
-#include <Urho3D/Graphics/Octree.h>
-#include <Urho3D/Graphics/Renderer.h>
 #include <Urho3D/Graphics/Texture2D.h>
-#include <Urho3D/Graphics/Zone.h>
 #include <Urho3D/Input/Input.h>
 #include <Urho3D/Network/Network.h>
 #include <Urho3D/Resource/ResourceCache.h>
@@ -25,16 +22,12 @@ namespace GameLib
 {
 
 GameState::GameState(App* app, Urho3D::Context* context, Urho3D::String const& host, uint16_t port) :
-    UrhoExtras::States::State(context),
-    app(app),
+    SceneRendererState(app, context),
     controlled_node_id(0),
     yaw(0),
     pitch(0),
     get_yaw_and_pitch_from_gameobject(false)
 {
-    // Scene
-    app->getScene()->CreateComponent<Urho3D::Octree>(Urho3D::LOCAL);
-
     // Camera and listener
     Urho3D::Node* camera_node = app->getScene()->CreateChild("camera", Urho3D::LOCAL);
     Urho3D::Camera* camera = camera_node->CreateComponent<Urho3D::Camera>();
@@ -63,7 +56,7 @@ void GameState::show()
 
     // Subscribe to custom network events
     Urho3D::Vector<Urho3D::StringHash> network_events;
-    app->getClientNetworkEvents(network_events);
+    getApp()->getClientNetworkEvents(network_events);
     for (unsigned i = 0; i < network_events.Size(); ++ i) {
         Urho3D::StringHash const& network_event = network_events[i];
         SubscribeToEvent(network_event, URHO3D_HANDLER(GameState, handleCustomNetworkEvent));
@@ -84,28 +77,11 @@ void GameState::hide()
 
     // Unsubscribe from custom network events
     Urho3D::Vector<Urho3D::StringHash> network_events;
-    app->getClientNetworkEvents(network_events);
+    getApp()->getClientNetworkEvents(network_events);
     for (unsigned i = 0; i < network_events.Size(); ++ i) {
         Urho3D::StringHash const& network_event = network_events[i];
         UnsubscribeFromEvent(network_event);
     }
-}
-
-void GameState::prepareSceneForRendering()
-{
-    Urho3D::Renderer* renderer = GetSubsystem<Urho3D::Renderer>();
-
-    // Create viewport
-    Urho3D::Node* camera_node = app->getScene()->GetChild("camera");
-    Urho3D::SharedPtr<Urho3D::Viewport> viewport(new Urho3D::Viewport(context_, app->getScene(), camera_node->GetComponent<Urho3D::Camera>()));
-    renderer->SetViewport(0, viewport);
-
-    // Set fog and ambient lighting
-    Urho3D::Zone* default_zone = renderer->GetDefaultZone();
-    default_zone->SetFogStart(1600);
-    default_zone->SetFogEnd(2000);
-    default_zone->SetFogColor(Urho3D::Color::WHITE);
-    default_zone->SetAmbientColor(Urho3D::Color(0.35, 0.35, 0.35));
 }
 
 void GameState::handleKeyDown(Urho3D::StringHash event_type, Urho3D::VariantMap& event_data)
@@ -131,7 +107,7 @@ void GameState::handleUpdate(Urho3D::StringHash event_type, Urho3D::VariantMap& 
         Urho3D::Input* input = GetSubsystem<Urho3D::Input>();
         Urho3D::Controls controls;
 
-        Urho3D::Node* controlled_node = app->getScene()->GetNode(controlled_node_id);
+        Urho3D::Node* controlled_node = getApp()->getScene()->GetNode(controlled_node_id);
 
         if (controlled_node) {
 
@@ -158,7 +134,7 @@ void GameState::handleUpdate(Urho3D::StringHash event_type, Urho3D::VariantMap& 
             conn->SetControls(controls);
 
             // Let possible GameObject in the controlled node set the camera transform
-            Urho3D::Node* camera_node = app->getScene()->GetChild("camera");
+            Urho3D::Node* camera_node = getApp()->getScene()->GetChild("camera");
             for (unsigned i = 0; i < controlled_node->GetNumComponents(); ++ i) {
                 Urho3D::Component* component = controlled_node->GetComponents()[i];
                 GameObject* gameobj = dynamic_cast<GameObject*>(component);
@@ -171,7 +147,7 @@ void GameState::handleUpdate(Urho3D::StringHash event_type, Urho3D::VariantMap& 
     }
 
     // Run game objects
-    Urho3D::PODVector<Urho3D::Node*> children = app->getScene()->GetChildren(false);
+    Urho3D::PODVector<Urho3D::Node*> children = getApp()->getScene()->GetChildren(false);
     for (unsigned i = 0; i < children.Size(); ++ i) {
         Urho3D::Node* child_node = children[i];
 
@@ -207,7 +183,7 @@ void GameState::handleSetControlledNode(Urho3D::StringHash event_type, Urho3D::V
 
 void GameState::handleCustomNetworkEvent(Urho3D::StringHash event_type, Urho3D::VariantMap& event_data)
 {
-    app->handleClientNetworkEvent(event_type, event_data);
+    getApp()->handleClientNetworkEvent(event_type, event_data);
 }
 
 }

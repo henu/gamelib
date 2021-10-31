@@ -1,6 +1,8 @@
 #ifndef GAMELIB_GAMEOBJECT_HPP
 #define GAMELIB_GAMEOBJECT_HPP
 
+#include "shape.hpp"
+
 #include <Urho3D/Core/Context.h>
 #include <Urho3D/Input/Controls.h>
 #include <Urho3D/Math/Ray.h>
@@ -18,7 +20,7 @@ public:
     GameObject(Urho3D::Context* context);
     virtual ~GameObject();
 
-    virtual void finishCreation();
+    virtual void finishCreation(bool enable_physics = true);
 
     // Return false if GameObject should be destroyed
     virtual bool runServerSide(float deltatime, Urho3D::Controls const* controls);
@@ -33,6 +35,8 @@ public:
     virtual void handleExplosion(Urho3D::Vector3 const& pos);
 
     virtual Urho3D::Matrix3x4 getCameraTransform() const;
+
+    virtual Shape getPlacementShape() const;
 
     bool hitscan(Urho3D::Vector3& result_hitpos, Urho3D::Ray const& ray);
 

@@ -15,8 +15,9 @@ GameObject::~GameObject()
 {
 }
 
-void GameObject::finishCreation()
+void GameObject::finishCreation(bool enable_physics)
 {
+    (void)enable_physics;
 }
 
 bool GameObject::runServerSide(float deltatime, Urho3D::Controls const* controls)
@@ -51,6 +52,11 @@ void GameObject::handleExplosion(Urho3D::Vector3 const& pos)
 Urho3D::Matrix3x4 GameObject::getCameraTransform() const
 {
     return Urho3D::Matrix3x4::IDENTITY;
+}
+
+Shape GameObject::getPlacementShape() const
+{
+    return Shape();
 }
 
 bool GameObject::hitscan(Urho3D::Vector3& result_hitpos, Urho3D::Ray const& ray)
