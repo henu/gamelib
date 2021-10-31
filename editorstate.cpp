@@ -21,9 +21,10 @@ float const MOVEMENT_SPEED = 10;
 EditorState::EditorState(App* app, Urho3D::Context* context, Urho3D::String const& path) :
     SceneRendererState(app, context),
     path(path),
+    mode(MODE_DEFAULT),
     cam_control(context),
-    cam_rotating(false),
-    brush_selection(-1)
+    brush_selection(-1),
+    brush_yaw(0)
 {
     // Camera and listener
     cam_control.setPitch(45);
@@ -60,6 +61,7 @@ void EditorState::show()
 
     // Subscribe to events
     SubscribeToEvent(Urho3D::E_KEYDOWN, URHO3D_HANDLER(EditorState, handleKeyDown));
+    SubscribeToEvent(Urho3D::E_KEYUP, URHO3D_HANDLER(EditorState, handleKeyUp));
     SubscribeToEvent(Urho3D::E_MOUSEBUTTONDOWN, URHO3D_HANDLER(EditorState, handleMouseButtonDown));
     SubscribeToEvent(Urho3D::E_MOUSEBUTTONUP, URHO3D_HANDLER(EditorState, handleMouseButtonUp));
     SubscribeToEvent(Urho3D::E_MOUSEWHEEL, URHO3D_HANDLER(EditorState, handleMouseWheel));
@@ -81,17 +83,35 @@ void EditorState::hide()
 
     // Unsubscribe from events
     UnsubscribeFromEvent(Urho3D::E_KEYDOWN);
+    UnsubscribeFromEvent(Urho3D::E_KEYUP);
     UnsubscribeFromEvent(Urho3D::E_MOUSEBUTTONDOWN);
     UnsubscribeFromEvent(Urho3D::E_MOUSEBUTTONUP);
     UnsubscribeFromEvent(Urho3D::E_MOUSEWHEEL);
     UnsubscribeFromEvent(Urho3D::E_UPDATE);
 }
 
-
 void EditorState::handleKeyDown(Urho3D::StringHash event_type, Urho3D::VariantMap& event_data)
 {
     (void)event_type;
-    (void)event_data;
+
+    int key = event_data[Urho3D::KeyDown::P_KEY].GetInt();
+
+    if (key == Urho3D::KEY_R && mode == MODE_DEFAULT && brush_selection >= 0) {
+        mode = MODE_ROTATING_OBJECT;
+        GetSubsystem<Urho3D::Input>()->SetMouseVisible(false);
+    }
+}
+
+void EditorState::handleKeyUp(Urho3D::StringHash event_type, Urho3D::VariantMap& event_data)
+{
+    (void)event_type;
+
+    int key = event_data[Urho3D::KeyDown::P_KEY].GetInt();
+
+    if (key == Urho3D::KEY_R && mode == MODE_ROTATING_OBJECT) {
+        mode = MODE_DEFAULT;
+        GetSubsystem<Urho3D::Input>()->SetMouseVisible(true);
+    }
 }
 
 void EditorState::handleMouseButtonDown(Urho3D::StringHash event_type, Urho3D::VariantMap& event_data)
@@ -101,7 +121,7 @@ void EditorState::handleMouseButtonDown(Urho3D::StringHash event_type, Urho3D::V
     int button = event_data[Urho3D::MouseButtonDown::P_BUTTON].GetInt();
 
     if (button == Urho3D::MOUSEB_LEFT) {
-        if (!cam_rotating) {
+        if (mode == MODE_DEFAULT) {
             if (brush_selection >= 0) {
                 Urho3D::Node* brush_node = getApp()->getScene()->GetChild("brush");
                 Urho3D::Node* node = getApp()->getScene()->CreateChild();
@@ -111,8 +131,8 @@ void EditorState::handleMouseButtonDown(Urho3D::StringHash event_type, Urho3D::V
                 obj->finishCreation(false);
             }
         }
-    } else if (button == Urho3D::MOUSEB_RIGHT) {
-        cam_rotating = true;
+    } else if (button == Urho3D::MOUSEB_RIGHT && mode == MODE_DEFAULT) {
+        mode = MODE_ROTATING_VIEW;
         GetSubsystem<Urho3D::Input>()->SetMouseVisible(false);
     }
 }
@@ -123,8 +143,8 @@ void EditorState::handleMouseButtonUp(Urho3D::StringHash event_type, Urho3D::Var
 
     int button = event_data[Urho3D::MouseButtonDown::P_BUTTON].GetInt();
 
-    if (button == Urho3D::MOUSEB_RIGHT) {
-        cam_rotating = false;
+    if (button == Urho3D::MOUSEB_RIGHT && mode == MODE_ROTATING_VIEW) {
+        mode = MODE_DEFAULT;
         GetSubsystem<Urho3D::Input>()->SetMouseVisible(true);
     }
 }
@@ -151,20 +171,27 @@ void EditorState::handleUpdate(Urho3D::StringHash event_type, Urho3D::VariantMap
 {
     (void)event_type;
 
+    Urho3D::Input* input = GetSubsystem<Urho3D::Input>();
+
     float deltatime = event_data[Urho3D::Update::P_TIMESTEP].GetFloat();
 
     // Update camera transform
-    cam_control.update(cam_rotating);
+    cam_control.update(mode == MODE_ROTATING_VIEW);
     Urho3D::Node* cam_node = getApp()->getScene()->GetChild("camera");
     cam_node->SetRotation(cam_control.getRotation());
     cam_node->SetPosition(cam_node->GetPosition() + cam_control.getFlyingMovement() * deltatime * MOVEMENT_SPEED);
+
+    // Rotate object
+    if (mode == MODE_ROTATING_OBJECT) {
+        brush_yaw += input->GetMouseMoveX() * 1;
+    }
 
     // Update brush "cursor"
     Urho3D::Vector3 brush_pos;
     Urho3D::Vector3 brush_normal;
     Urho3D::Node* brush_node = getApp()->getScene()->GetChild("brush");
     bool brush_visible = raycast(brush_pos, brush_normal);
-    if (brush_visible && brush_selection >= 0 && !cam_rotating) {
+    if (brush_visible && brush_selection >= 0 && (mode == MODE_DEFAULT || mode == MODE_ROTATING_OBJECT)) {
         GameObject* obj = NULL;
         if (!brush_node) {
             brush_node = getApp()->getScene()->CreateChild("brush");
@@ -182,7 +209,13 @@ void EditorState::handleUpdate(Urho3D::StringHash event_type, Urho3D::VariantMap
             assert(obj);
         }
         if (obj) {
+            float final_brush_yaw = brush_yaw;
+            if (input->GetKeyDown(Urho3D::KEY_G)) {
+                brush_pos = getApp()->snapPosition(brush_pos);
+                final_brush_yaw = getApp()->snapAngle(brush_yaw);
+            }
             brush_node->SetPosition(calculateObjectPlacementPosition(brush_pos, brush_normal, obj));
+            brush_node->SetRotation(Urho3D::Quaternion(final_brush_yaw, Urho3D::Vector3::UP));
         }
     } else {
         if (brush_node) {
@@ -199,7 +232,10 @@ bool EditorState::raycast(Urho3D::Vector3& result_pos, Urho3D::Vector3& result_n
 
     Urho3D::Node* camera_node = getApp()->getScene()->GetChild("camera");
     Urho3D::Camera* camera = camera_node->GetComponent<Urho3D::Camera>();
-    Urho3D::IntVector2 mouse_pos = input->GetMousePosition();
+    static Urho3D::IntVector2 mouse_pos;
+    if (mode == MODE_DEFAULT) {
+        mouse_pos = input->GetMousePosition();
+    }
     Urho3D::Ray mouse_ray = camera->GetScreenRay((float)mouse_pos.x_ / graphics->GetWidth(), (float)mouse_pos.y_ / graphics->GetHeight());
     Urho3D::PODVector<Urho3D::RayQueryResult> raycast_results;
     Urho3D::RayOctreeQuery raycast_query(raycast_results, mouse_ray, Urho3D::RAY_TRIANGLE, Urho3D::M_INFINITY, Urho3D::DRAWABLE_GEOMETRY);

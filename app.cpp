@@ -104,6 +104,16 @@ Urho3D::String App::getDefaultHost()
     return "localhost";
 }
 
+Urho3D::Vector3 App::snapPosition(Urho3D::Vector3 const& pos)
+{
+    return Urho3D::Vector3(Urho3D::Round(pos.x_), Urho3D::Round(pos.y_), Urho3D::Round(pos.z_));
+}
+
+float App::snapAngle(float angle)
+{
+    return Urho3D::Round(angle / 22.5) * 22.5;
+}
+
 void App::readArguments()
 {
     // Do the reading

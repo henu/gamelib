@@ -24,18 +24,28 @@ public:
 
 private:
 
+    enum Mode
+    {
+        MODE_DEFAULT,
+        MODE_ROTATING_VIEW,
+        MODE_ROTATING_OBJECT
+    };
+
     Urho3D::String path;
 
     Urho3D::Vector<Urho3D::StringHash> editable_object_types;
 
+    Mode mode;
+
     // Camera
     UrhoExtras::CameraControl cam_control;
-    bool cam_rotating;
 
     // Brush
     int brush_selection;
+    float brush_yaw;
 
     void handleKeyDown(Urho3D::StringHash event_type, Urho3D::VariantMap& event_data);
+    void handleKeyUp(Urho3D::StringHash event_type, Urho3D::VariantMap& event_data);
     void handleMouseButtonDown(Urho3D::StringHash event_type, Urho3D::VariantMap& event_data);
     void handleMouseButtonUp(Urho3D::StringHash event_type, Urho3D::VariantMap& event_data);
     void handleMouseWheel(Urho3D::StringHash event_type, Urho3D::VariantMap& event_data);

@@ -30,6 +30,9 @@ public:
     virtual uint16_t getDefaultPort();
     virtual Urho3D::String getDefaultHost();
 
+    virtual Urho3D::Vector3 snapPosition(Urho3D::Vector3 const& pos);
+    virtual float snapAngle(float angle);
+
 private:
 
     // Arguments from command line
