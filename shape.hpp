@@ -3,6 +3,7 @@
 
 #include <Urho3D/Container/Vector.h>
 #include <Urho3D/Math/Vector3.h>
+#include <Urho3D/Math/Matrix3x4.h>
 
 namespace GameLib
 {
@@ -52,6 +53,11 @@ public:
         data.Push(size.z_);
     }
 
+    inline void setTransform(Urho3D::Matrix3x4 const& transf)
+    {
+        this->transf = transf;
+    }
+
     inline Urho3D::Vector3 positionAtNormal(Urho3D::Vector3 dir) const
     {
         dir.Normalize();
@@ -75,21 +81,21 @@ public:
                 dir_xz.Normalize();
                 return Urho3D::Vector3(dir_xz.x_ * data[1] / 2, data[0] / 2, dir_xz.y_ * data[1] / 2);
             }
-            return Urho3D::Vector3::UP * -data[0] / 2;
+            return transf.Inverse() * (Urho3D::Vector3::UP * -data[0] / 2);
         }
 
         if (type == BOX) {
             // Easy cases
-            if (dir.x_ > Urho3D::Sin(89.0)) return Urho3D::Vector3::RIGHT * data[0] / 2;
-            if (dir.x_ < Urho3D::Sin(-89.0)) return Urho3D::Vector3::RIGHT * -data[0] / 2;
-            if (dir.y_ > Urho3D::Sin(89.0)) return Urho3D::Vector3::UP * data[1] / 2;
-            if (dir.y_ < Urho3D::Sin(-89.0)) return Urho3D::Vector3::UP * -data[1] / 2;
-            if (dir.z_ > Urho3D::Sin(89.0)) return Urho3D::Vector3::FORWARD * data[2] / 2;
-            if (dir.z_ < Urho3D::Sin(-89.0)) return Urho3D::Vector3::FORWARD * -data[2] / 2;
+            if (dir.x_ > Urho3D::Sin(89.0)) return transf.Inverse() * (Urho3D::Vector3::RIGHT * data[0] / 2);
+            if (dir.x_ < Urho3D::Sin(-89.0)) return transf.Inverse() * (Urho3D::Vector3::RIGHT * -data[0] / 2);
+            if (dir.y_ > Urho3D::Sin(89.0)) return transf.Inverse() * (Urho3D::Vector3::UP * data[1] / 2);
+            if (dir.y_ < Urho3D::Sin(-89.0)) return transf.Inverse() * (Urho3D::Vector3::UP * -data[1] / 2);
+            if (dir.z_ > Urho3D::Sin(89.0)) return transf.Inverse() * (Urho3D::Vector3::FORWARD * data[2] / 2);
+            if (dir.z_ < Urho3D::Sin(-89.0)) return transf.Inverse() * (Urho3D::Vector3::FORWARD * -data[2] / 2);
 // TODO: Code edge and corner cases as well!
         }
 
-        return Urho3D::Vector3::ZERO;
+        return transf.Inverse() * Urho3D::Vector3::ZERO;
     }
 
 private:
@@ -97,6 +103,8 @@ private:
     Type type;
 
     Urho3D::Vector<float> data;
+
+    Urho3D::Matrix3x4 transf;
 };
 
 }
