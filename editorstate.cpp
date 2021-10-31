@@ -206,12 +206,20 @@ bool EditorState::raycast(Urho3D::Vector3& result_pos, Urho3D::Vector3& result_n
     getApp()->getScene()->GetComponent<Urho3D::Octree>()->Raycast(raycast_query);
 
     // If there was a hit to some object
+    Urho3D::Node* brush_node = getApp()->getScene()->GetChild("brush");
     for (unsigned i = 0; i < raycast_results.Size(); ++ i) {
         Urho3D::RayQueryResult raycast_result = raycast_results[i];
         // Skip brush object
-        if (raycast_result.drawable_->GetNode() == getApp()->getScene()->GetChild("brush")) {
-            continue;
+        Urho3D::Node* raycast_node = raycast_result.drawable_->GetNode();
+        bool skip = false;
+        while(raycast_node != getApp()->getScene()) {
+            if (raycast_node == brush_node) {
+                skip = true;
+                break;
+            }
+            raycast_node = raycast_node->GetParent();
         }
+        if (skip) continue;
         result_pos = raycast_result.position_;
         result_normal = raycast_result.normal_;
         return true;

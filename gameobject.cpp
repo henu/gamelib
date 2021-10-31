@@ -71,13 +71,16 @@ bool GameObject::hitscan(Urho3D::Vector3& result_hitpos, Urho3D::Ray const& ray)
     for (unsigned i = 0; i < ray_hits.Size(); ++ i) {
         Urho3D::RayQueryResult const& ray_hit = ray_hits[i];
         Urho3D::Node* node = ray_hit.drawable_->GetNode();
-        for (unsigned j = 0; j < node->GetNumComponents(); ++ j) {
-            Urho3D::Component* component = node->GetComponents()[j];
-            GameLib::GameObject* gameobj = dynamic_cast<GameLib::GameObject*>(component);
-            if (gameobj && gameobj != this && gameobj->handleHitscan(ray_hit.position_, ray.direction_)) {
-                result_hitpos = ray_hit.position_;
-                return true;
+        while (node != GetScene()) {
+            for (unsigned j = 0; j < node->GetNumComponents(); ++ j) {
+                Urho3D::Component* component = node->GetComponents()[j];
+                GameLib::GameObject* gameobj = dynamic_cast<GameLib::GameObject*>(component);
+                if (gameobj && gameobj != this && gameobj->handleHitscan(ray_hit.position_, ray.direction_)) {
+                    result_hitpos = ray_hit.position_;
+                    return true;
+                }
             }
+            node = node->GetParent();
         }
     }
 
