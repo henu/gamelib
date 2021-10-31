@@ -104,6 +104,16 @@ Urho3D::String App::getDefaultHost()
     return "localhost";
 }
 
+Urho3D::Color App::getFogColor()
+{
+    return Urho3D::Color::BLACK;
+}
+
+Urho3D::Color App::getAmbientLight()
+{
+    return Urho3D::Color(0.35, 0.35, 0.35);
+}
+
 Urho3D::Vector3 App::snapPosition(Urho3D::Vector3 const& pos)
 {
     return Urho3D::Vector3(Urho3D::Round(pos.x_), Urho3D::Round(pos.y_), Urho3D::Round(pos.z_));

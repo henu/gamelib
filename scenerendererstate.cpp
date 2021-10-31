@@ -33,8 +33,8 @@ void SceneRendererState::prepareSceneForRendering()
     Urho3D::Zone* default_zone = renderer->GetDefaultZone();
     default_zone->SetFogStart(1600);
     default_zone->SetFogEnd(2000);
-    default_zone->SetFogColor(Urho3D::Color::WHITE);
-    default_zone->SetAmbientColor(Urho3D::Color(0.35, 0.35, 0.35));
+    default_zone->SetFogColor(app->getFogColor());
+    default_zone->SetAmbientColor(app->getAmbientLight());
 }
 
 }
