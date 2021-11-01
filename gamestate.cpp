@@ -9,9 +9,11 @@
 #include <Urho3D/Audio/SoundListener.h>
 #include <Urho3D/Core/CoreEvents.h>
 #include <Urho3D/Graphics/Camera.h>
+#include <Urho3D/Graphics/DecalSet.h>
 #include <Urho3D/Graphics/Graphics.h>
 #include <Urho3D/Graphics/Texture2D.h>
 #include <Urho3D/Input/Input.h>
+#include <Urho3D/IO/Log.h>
 #include <Urho3D/Network/Network.h>
 #include <Urho3D/Resource/ResourceCache.h>
 #include <Urho3D/Scene/SceneEvents.h>
@@ -21,12 +23,15 @@
 namespace GameLib
 {
 
+unsigned const MAX_DECALS = 10000;
+
 GameState::GameState(App* app, Urho3D::Context* context, Urho3D::String const& host, uint16_t port) :
     SceneRendererState(app, context),
     controlled_node_id(0),
     yaw(0),
     pitch(0),
-    get_yaw_and_pitch_from_gameobject(false)
+    get_yaw_and_pitch_from_gameobject(false),
+    decals_total(0)
 {
     // Camera and listener
     Urho3D::Node* camera_node = app->getScene()->CreateChild("camera", Urho3D::LOCAL);
@@ -65,6 +70,8 @@ void GameState::show()
 
     // Hide mouse cursor
     GetSubsystem<Urho3D::Input>()->SetMouseVisible(false);
+
+    getApp()->setGameState(this);
 }
 
 void GameState::hide()
@@ -81,6 +88,43 @@ void GameState::hide()
     for (unsigned i = 0; i < network_events.Size(); ++ i) {
         Urho3D::StringHash const& network_event = network_events[i];
         UnsubscribeFromEvent(network_event);
+    }
+
+    getApp()->setGameState(NULL);
+}
+
+void GameState::addDecalsRecursively(Urho3D::Node* node, Urho3D::Frustum const& frustum, Urho3D::Material* mat, Urho3D::Vector3 const& pos, Urho3D::Quaternion const& rot, float size, float aspect, float depth, Urho3D::Vector2 const& uv_begin, Urho3D::Vector2 const& uv_end)
+{
+    // Call children recursively
+    for (unsigned child_i = 0; child_i < node->GetNumChildren(); ++ child_i) {
+        Urho3D::Node* child = node->GetChild(child_i);
+        addDecalsRecursively(child, frustum, mat, pos, rot, size, aspect, depth, uv_begin, uv_end);
+    }
+    // Add all drawable components in this node
+    Urho3D::DecalSet* decalset = NULL;
+    Urho3D::Vector<Urho3D::SharedPtr<Urho3D::Component> > comps = node->GetComponents();
+    for (unsigned comp_i = 0; comp_i < comps.Size(); ++ comp_i) {
+        Urho3D::Component* comp = comps[comp_i];
+        Urho3D::Drawable* drawable = dynamic_cast<Urho3D::Drawable*>(comp);
+        Urho3D::DecalSet* decalset_check = dynamic_cast<Urho3D::DecalSet*>(comp);
+        if (drawable && !decalset_check && frustum.IsInside(drawable->GetWorldBoundingBox()) != Urho3D::OUTSIDE) {
+            if (!decalset) {
+                decalset = node->GetComponent<Urho3D::DecalSet>();
+                if (decalset) {
+                    if (decalset->GetMaterial() != mat) {
+                        URHO3D_LOGERROR("Currently only one decal set material is supported per node!");
+                        return;
+                    }
+                } else {
+                    decalset = drawable->GetNode()->CreateComponent<Urho3D::DecalSet>();
+                    decalset->SetMaterial(mat);
+                }
+            }
+            if (decalset->AddDecal(drawable, pos, rot, size, aspect, depth, uv_begin, uv_end)) {
+                // Keep track of total decal count
+                ++ decals_total;
+            }
+        }
     }
 }
 
@@ -162,6 +206,11 @@ void GameState::handleUpdate(Urho3D::StringHash event_type, Urho3D::VariantMap& 
             }
         }
     }
+
+    // If number of decals grows too big, then clean some of them
+    if (decals_total > MAX_DECALS) {
+        decals_total = reduceDecalsRecursively(getApp()->getScene());
+    }
 }
 
 void GameState::handleComponentAdded(Urho3D::StringHash event_type, Urho3D::VariantMap& event_data)
@@ -184,6 +233,36 @@ void GameState::handleSetControlledNode(Urho3D::StringHash event_type, Urho3D::V
 void GameState::handleCustomNetworkEvent(Urho3D::StringHash event_type, Urho3D::VariantMap& event_data)
 {
     getApp()->handleClientNetworkEvent(event_type, event_data);
+}
+
+unsigned GameState::reduceDecalsRecursively(Urho3D::Node* node)
+{
+    unsigned new_decal_count = 0;
+
+    // Call children recursively
+    for (unsigned child_i = 0; child_i < node->GetNumChildren(); ++ child_i) {
+        Urho3D::Node* child = node->GetChild(child_i);
+        new_decal_count += reduceDecalsRecursively(child);
+    }
+
+    // Reduce decals in this node
+    Urho3D::Vector<Urho3D::SharedPtr<Urho3D::Component> > comps = node->GetComponents();
+    for (unsigned comp_i = 0; comp_i < comps.Size(); ++ comp_i) {
+        Urho3D::Component* comp = comps[comp_i];
+        Urho3D::DecalSet* decalset = dynamic_cast<Urho3D::DecalSet*>(comp);
+        if (decalset) {
+            decalset->RemoveDecals(1);
+            // If empty, then clear the whole decalset
+            unsigned decalset_decals = decalset->GetNumDecals();
+            if (!decalset_decals) {
+                node->RemoveComponent(comp);
+            } else {
+                new_decal_count += decalset_decals;
+            }
+        }
+    }
+
+    return new_decal_count;
 }
 
 }

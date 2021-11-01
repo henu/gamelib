@@ -49,6 +49,11 @@ void GameObject::handleExplosion(Urho3D::Vector3 const& pos)
     (void)pos;
 }
 
+bool GameObject::receiveDecals() const
+{
+    return false;
+}
+
 Urho3D::Matrix3x4 GameObject::getCameraTransform() const
 {
     return Urho3D::Matrix3x4::IDENTITY;

@@ -4,6 +4,8 @@
 #include "serverstate.hpp"
 #include "editorstate.hpp"
 
+#include "../urhoextras/mathutils.hpp"
+
 #include <Urho3D/Graphics/Octree.h>
 #include <Urho3D/IO/Log.h>
 
@@ -15,7 +17,8 @@ namespace GameLib
 App::App(Urho3D::Context* context) :
     UrhoExtras::States::StateManager(context),
     arg_server_port(0),
-    arg_client_port(0)
+    arg_client_port(0),
+    gamestate(NULL)
 {
     try {
         readArguments();
@@ -122,6 +125,48 @@ Urho3D::Vector3 App::snapPosition(Urho3D::Vector3 const& pos)
 float App::snapAngle(float angle)
 {
     return Urho3D::Round(angle / 22.5) * 22.5;
+}
+
+void App::setGameState(GameState* gamestate)
+{
+    this->gamestate = gamestate;
+}
+
+void App::addDecalToGameObjects(Urho3D::Material* mat, Urho3D::Vector3 const& pos, Urho3D::Vector3 const& dir, float size, float aspect, float depth, Urho3D::Vector2 const& uv_begin, Urho3D::Vector2 const& uv_end)
+{
+    // Convert direction to pitch and yaw
+    float pitch;
+    float yaw;
+    UrhoExtras::getPitchAndYaw(pitch, yaw, dir);
+    // Start with random roll
+    Urho3D::Quaternion rot(Urho3D::Random(360.0f), Urho3D::Vector3::FORWARD);
+    // Apply pitch and yaw
+    rot = Urho3D::Quaternion(pitch, Urho3D::Vector3::RIGHT) * rot;
+    rot = Urho3D::Quaternion(yaw, Urho3D::Vector3::UP) * rot;
+    // Add decal
+    addDecalToGameObjects(mat, pos, rot, size, aspect, depth, uv_begin, uv_end);
+}
+
+void App::addDecalToGameObjects(Urho3D::Material* mat, Urho3D::Vector3 const& pos, Urho3D::Quaternion const& rot, float size, float aspect, float depth, Urho3D::Vector2 const& uv_begin, Urho3D::Vector2 const& uv_end)
+{
+    // Create a frustum for decal. This can be used to discard drawables that we are not gonna hit.
+    Urho3D::Vector3 abs_pos_adjusted = pos - 0.5f * depth * (rot * Urho3D::Vector3::FORWARD);
+    Urho3D::Matrix3x4 frustum_transf = Urho3D::Matrix3x4(abs_pos_adjusted, rot, 1.0f);
+    Urho3D::Frustum frustum;
+    frustum.DefineOrtho(size, aspect, 1.0, 0.0f, depth, frustum_transf);
+
+    // Iterate all GameObjects and try to add decal to them
+    Urho3D::PODVector<Urho3D::Node*> children = scene->GetChildren(false);
+    for (unsigned child_i = 0; child_i < children.Size(); ++ child_i) {
+        Urho3D::Node* child_node = children[child_i];
+        for (unsigned comp_i = 0; comp_i < child_node->GetNumComponents(); ++ comp_i) {
+            Urho3D::Component* component = child_node->GetComponents()[comp_i];
+            GameObject* gameobj = dynamic_cast<GameObject*>(component);
+            if (gameobj && gameobj->receiveDecals()) {
+                gamestate->addDecalsRecursively(child_node, frustum, mat, pos, rot, size, aspect, depth, uv_begin, uv_end);
+            }
+        }
+    }
 }
 
 void App::readArguments()

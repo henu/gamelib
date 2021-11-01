@@ -3,10 +3,13 @@
 
 #include "../urhoextras/states/statemanager.hpp"
 
+#include <Urho3D/Graphics/Material.h>
 #include <Urho3D/Scene/Scene.h>
 
 namespace GameLib
 {
+
+class GameState;
 
 class App : public UrhoExtras::States::StateManager
 {
@@ -36,6 +39,14 @@ public:
     virtual Urho3D::Vector3 snapPosition(Urho3D::Vector3 const& pos);
     virtual float snapAngle(float angle);
 
+    // This is called by GameState
+    void setGameState(GameState* gamestate);
+
+protected:
+
+    void addDecalToGameObjects(Urho3D::Material* mat, Urho3D::Vector3 const& pos, Urho3D::Vector3 const& dir, float size, float aspect, float depth, Urho3D::Vector2 const& uv_begin, Urho3D::Vector2 const& uv_end);
+    void addDecalToGameObjects(Urho3D::Material* mat, Urho3D::Vector3 const& pos, Urho3D::Quaternion const& rot, float size, float aspect, float depth, Urho3D::Vector2 const& uv_begin, Urho3D::Vector2 const& uv_end);
+
 private:
 
     // Arguments from command line
@@ -48,6 +59,8 @@ private:
     Urho3D::String arg_editor_path;
 
     Urho3D::SharedPtr<Urho3D::Scene> scene;
+
+    GameState* gamestate;
 
     void readArguments();
 

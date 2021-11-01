@@ -34,6 +34,8 @@ public:
 
     virtual void handleExplosion(Urho3D::Vector3 const& pos);
 
+    virtual bool receiveDecals() const;
+
     virtual Urho3D::Matrix3x4 getCameraTransform() const;
 
     virtual Shape getPlacementShape() const;
