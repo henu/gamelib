@@ -11,6 +11,8 @@
 namespace GameLib
 {
 
+class App;
+
 class GameObject : public Urho3D::Component
 {
     URHO3D_OBJECT(GameObject, Urho3D::Component);
@@ -20,13 +22,15 @@ public:
     GameObject(Urho3D::Context* context);
     virtual ~GameObject();
 
-    virtual void finishCreation(bool enable_physics = true);
+    void finishCreation(App* app, bool enable_physics = true, Urho3D::VariantMap* data = NULL);
 
     // Return false if GameObject should be destroyed
     virtual bool runServerSide(float deltatime, Urho3D::Controls const* controls);
 
     // Return false if GameObject should be destroyed
     virtual bool runClientSide(float deltatime);
+
+    virtual void handleCreated(bool enable_physics, Urho3D::VariantMap* data);
 
     virtual void handleAddedToClient();
 
@@ -44,7 +48,13 @@ public:
 
     void explosion(Urho3D::Vector3 const& pos);
 
+protected:
+
+    App* getApp() const;
+
 private:
+
+    App* app;
 
 };
 

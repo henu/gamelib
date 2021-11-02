@@ -15,9 +15,10 @@ GameObject::~GameObject()
 {
 }
 
-void GameObject::finishCreation(bool enable_physics)
+void GameObject::finishCreation(App* app, bool enable_physics, Urho3D::VariantMap* data)
 {
-    (void)enable_physics;
+    this->app = app;
+    handleCreated(enable_physics, data);
 }
 
 bool GameObject::runServerSide(float deltatime, Urho3D::Controls const* controls)
@@ -31,6 +32,12 @@ bool GameObject::runClientSide(float deltatime)
 {
     (void)deltatime;
     return true;
+}
+
+void GameObject::handleCreated(bool enable_physics, Urho3D::VariantMap* data)
+{
+    (void)enable_physics;
+    (void)data;
 }
 
 void GameObject::handleAddedToClient()
@@ -106,6 +113,11 @@ void GameObject::explosion(Urho3D::Vector3 const& pos)
             }
         }
     }
+}
+
+App* GameObject::getApp() const
+{
+    return app;
 }
 
 }

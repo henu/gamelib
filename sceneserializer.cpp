@@ -1,5 +1,6 @@
 #include "sceneserializer.hpp"
 
+#include "app.hpp"
 #include "gameobject.hpp"
 
 #include <Urho3D/IO/File.h>
@@ -11,9 +12,9 @@ namespace GameLib
 
 uint16_t const VERSION_0_INITIAL = 0;
 
-void readSceneFromDisk(Urho3D::Scene* scene, Urho3D::String const& path, bool enable_physics)
+void readSceneFromDisk(App* app, Urho3D::String const& path, bool enable_physics)
 {
-    Urho3D::Context* context = scene->GetContext();
+    Urho3D::Context* context = app->GetContext();
 
     Urho3D::File file(context, path, Urho3D::FILE_READ);
 
@@ -41,12 +42,12 @@ void readSceneFromDisk(Urho3D::Scene* scene, Urho3D::String const& path, bool en
         Urho3D::Matrix3x4 transf = file.ReadMatrix3x4();
         // Only allow predefined objects
         if (editable_object_types.Contains(type)) {
-            Urho3D::Node* node = scene->CreateChild();
+            Urho3D::Node* node = app->getScene()->CreateChild();
             node->SetTransform(transf);
             Urho3D::Component* obj_raw = node->CreateComponent(type);
             GameObject* obj = dynamic_cast<GameObject*>(obj_raw);
             if (obj) {
-                obj->finishCreation(enable_physics);
+                obj->finishCreation(app, enable_physics);
             } else {
                 URHO3D_LOGERROR("Scene contains components that are not gameobjects!");
             }

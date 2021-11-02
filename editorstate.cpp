@@ -51,7 +51,7 @@ EditorState::EditorState(App* app, Urho3D::Context* context, Urho3D::String cons
     // Read scene, if it exists
     Urho3D::FileSystem* fs = GetSubsystem<Urho3D::FileSystem>();
     if (fs->FileExists(path)) {
-        readSceneFromDisk(getApp()->getScene(), path, false);
+        readSceneFromDisk(getApp(), path, false);
     }
 }
 
@@ -128,7 +128,7 @@ void EditorState::handleMouseButtonDown(Urho3D::StringHash event_type, Urho3D::V
                 node->SetTransform(brush_node->GetTransform());
                 Urho3D::Component* obj_raw = node->CreateComponent(editable_object_types[brush_selection]);
                 GameObject* obj = dynamic_cast<GameObject*>(obj_raw);
-                obj->finishCreation(false);
+                obj->finishCreation(getApp(), false);
             }
         }
     } else if (button == Urho3D::MOUSEB_RIGHT && mode == MODE_DEFAULT) {
@@ -197,7 +197,7 @@ void EditorState::handleUpdate(Urho3D::StringHash event_type, Urho3D::VariantMap
             brush_node = getApp()->getScene()->CreateChild("brush");
             Urho3D::Component* obj_raw = brush_node->CreateComponent(editable_object_types[brush_selection]);
             obj = dynamic_cast<GameObject*>(obj_raw);
-            obj->finishCreation(false);
+            obj->finishCreation(getApp(), false);
         } else {
             for (unsigned i = 0; i < brush_node->GetNumComponents(); ++ i) {
                 Urho3D::Component* component = brush_node->GetComponents()[i];
