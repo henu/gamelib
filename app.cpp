@@ -127,11 +127,6 @@ float App::snapAngle(float angle)
     return Urho3D::Round(angle / 22.5) * 22.5;
 }
 
-void App::setGameState(GameState* gamestate)
-{
-    this->gamestate = gamestate;
-}
-
 void App::addDecalToGameObjects(Urho3D::Material* mat, Urho3D::Vector3 const& pos, Urho3D::Vector3 const& dir, float size, float aspect, float depth, Urho3D::Vector2 const& uv_begin, Urho3D::Vector2 const& uv_end)
 {
     // Convert direction to pitch and yaw
@@ -167,6 +162,11 @@ void App::addDecalToGameObjects(Urho3D::Material* mat, Urho3D::Vector3 const& po
             }
         }
     }
+}
+
+void App::setGameState(GameState* gamestate)
+{
+    this->gamestate = gamestate;
 }
 
 void App::readArguments()
