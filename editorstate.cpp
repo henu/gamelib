@@ -100,6 +100,10 @@ void EditorState::handleKeyDown(Urho3D::StringHash event_type, Urho3D::VariantMa
         mode = MODE_ROTATING_OBJECT;
         GetSubsystem<Urho3D::Input>()->SetMouseVisible(false);
     }
+
+    if (key == Urho3D::KEY_ESCAPE) {
+        getStateManager()->popState();
+    }
 }
 
 void EditorState::handleKeyUp(Urho3D::StringHash event_type, Urho3D::VariantMap& event_data)
