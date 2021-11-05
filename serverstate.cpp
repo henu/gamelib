@@ -123,9 +123,15 @@ void ServerState::handleUpdate(Urho3D::StringHash event_type, Urho3D::VariantMap
     }
 
     // Run game objects
+    Urho3D::HashSet<Urho3D::Node*> removed_nodes;
     Urho3D::PODVector<Urho3D::Node*> children = app->getScene()->GetChildren(false);
     for (unsigned i = 0; i < children.Size(); ++ i) {
         Urho3D::Node* child_node = children[i];
+
+        // If node was removed, then skip it
+        if (removed_nodes.Contains(child_node)) {
+            continue;
+        }
 
         // Check if this node is controlled by somebody
         NodeControllers::iterator node_controllers_find = node_controllers.find(child_node->GetID());
@@ -144,6 +150,7 @@ void ServerState::handleUpdate(Urho3D::StringHash event_type, Urho3D::VariantMap
                     if (player->conn) {
                         if (!gameobj->runServerSide(deltatime, &player->conn->GetControls())) {
                             child_node->Remove();
+                            removed_nodes.Insert(child_node);
                             node_was_destroyed = true;
                             break;
                         }
@@ -151,6 +158,7 @@ void ServerState::handleUpdate(Urho3D::StringHash event_type, Urho3D::VariantMap
                 } else {
                     if (!gameobj->runServerSide(deltatime, NULL)) {
                         child_node->Remove();
+                        removed_nodes.Insert(child_node);
                         node_was_destroyed = true;
                         break;
                     }

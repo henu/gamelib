@@ -191,9 +191,15 @@ void GameState::handleUpdate(Urho3D::StringHash event_type, Urho3D::VariantMap& 
     }
 
     // Run game objects
+    Urho3D::HashSet<Urho3D::Node*> removed_nodes;
     Urho3D::PODVector<Urho3D::Node*> children = getApp()->getScene()->GetChildren(false);
     for (unsigned i = 0; i < children.Size(); ++ i) {
         Urho3D::Node* child_node = children[i];
+
+        // If node was removed, then skip it
+        if (removed_nodes.Contains(child_node)) {
+            continue;
+        }
 
         // Run possible GameObjects in this node
         for (unsigned j = 0; j < child_node->GetNumComponents(); ++ j) {
@@ -202,6 +208,8 @@ void GameState::handleUpdate(Urho3D::StringHash event_type, Urho3D::VariantMap& 
             if (gameobj) {
                 if (!gameobj->runClientSide(deltatime)) {
                     child_node->Remove();
+                    removed_nodes.Insert(child_node);
+                    break;
                 }
             }
         }
