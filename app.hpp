@@ -22,6 +22,8 @@ public:
 
     Urho3D::Scene* getScene();
 
+    bool isLocal() const;
+
     virtual void initializeSceneOnServer();
     virtual void initializeSceneOnClient();
 
@@ -46,6 +48,8 @@ public:
     void setGameState(GameState* gamestate);
 
 private:
+
+    bool is_local;
 
     // Arguments from command line
     // For server

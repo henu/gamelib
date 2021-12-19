@@ -22,6 +22,10 @@ public:
     GameObject(Urho3D::Context* context);
     virtual ~GameObject();
 
+    // Called on client by GameState
+    void setApp(App* app);
+
+    // This is only called on server and in editor
     void finishCreation(App* app, bool enable_physics = true, Urho3D::VariantMap* data = NULL);
 
     // Return false if GameObject should be destroyed
@@ -30,6 +34,7 @@ public:
     // Return false if GameObject should be destroyed
     virtual bool runClientSide(float deltatime);
 
+    // This is only called on server and in editor
     virtual void handleCreated(bool enable_physics, Urho3D::VariantMap* data);
 
     virtual void handleAddedToClient();

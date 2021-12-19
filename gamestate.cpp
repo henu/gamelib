@@ -227,6 +227,7 @@ void GameState::handleComponentAdded(Urho3D::StringHash event_type, Urho3D::Vari
     Urho3D::Component* component = static_cast<Urho3D::Component*>(event_data[Urho3D::ComponentAdded::P_COMPONENT].GetPtr());
     GameObject* gameobj = dynamic_cast<GameObject*>(component);
     if (gameobj) {
+        gameobj->setApp(getApp());
         gameobj->handleAddedToClient();
     }
 }

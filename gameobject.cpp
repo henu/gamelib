@@ -7,12 +7,18 @@ namespace GameLib
 {
 
 GameObject::GameObject(Urho3D::Context* context) :
-    Urho3D::Component(context)
+    Urho3D::Component(context),
+    app(nullptr)
 {
 }
 
 GameObject::~GameObject()
 {
+}
+
+void GameObject::setApp(App* app)
+{
+    this->app = app;
 }
 
 void GameObject::finishCreation(App* app, bool enable_physics, Urho3D::VariantMap* data)

@@ -16,6 +16,7 @@ namespace GameLib
 
 App::App(Urho3D::Context* context) :
     UrhoExtras::States::StateManager(context),
+    is_local(false),
     arg_server_port(0),
     arg_client_port(0),
     gamestate(NULL)
@@ -56,6 +57,7 @@ void App::Start()
     }
     // If client
     else if (arg_client_port > 0) {
+        is_local = true;
         pushState(Urho3D::SharedPtr<GameState>(new GameState(this, context_, arg_client_host, arg_client_port)));
     }
     // If scene editor
@@ -64,6 +66,7 @@ void App::Start()
     }
     // If no arguments are given, then connect to default server
     else {
+        is_local = true;
         pushState(Urho3D::SharedPtr<GameState>(new GameState(this, context_, getDefaultHost(), getDefaultPort())));
     }
 }
@@ -71,6 +74,11 @@ void App::Start()
 Urho3D::Scene* App::getScene()
 {
     return scene;
+}
+
+bool App::isLocal() const
+{
+    return is_local;
 }
 
 void App::initializeSceneOnServer()
