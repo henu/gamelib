@@ -89,6 +89,11 @@ void App::initializeSceneOnClient()
 {
 }
 
+void App::stepOnClient(float deltatime)
+{
+    (void)deltatime;
+}
+
 Urho3D::Node* App::createNodeAndGameObjectForPlayer()
 {
     return NULL;

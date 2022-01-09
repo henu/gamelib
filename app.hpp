@@ -3,6 +3,7 @@
 
 #include "../urhoextras/states/statemanager.hpp"
 
+#include <Urho3D/Engine/Application.h>
 #include <Urho3D/Graphics/Material.h>
 #include <Urho3D/Scene/Scene.h>
 
@@ -26,6 +27,8 @@ public:
 
     virtual void initializeSceneOnServer();
     virtual void initializeSceneOnClient();
+
+    virtual void stepOnClient(float deltatime);
 
     virtual Urho3D::Node* createNodeAndGameObjectForPlayer();
 

@@ -146,6 +146,8 @@ void GameState::handleUpdate(Urho3D::StringHash event_type, Urho3D::VariantMap& 
 
     Urho3D::Connection* conn = GetSubsystem<Urho3D::Network>()->GetServerConnection();
 
+    getApp()->stepOnClient(deltatime);
+
     // Send controls to server
     if (conn) {
         Urho3D::Input* input = GetSubsystem<Urho3D::Input>();
