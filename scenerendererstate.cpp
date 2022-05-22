@@ -31,8 +31,8 @@ void SceneRendererState::prepareSceneForRendering()
 
     // Set fog and ambient lighting
     Urho3D::Zone* default_zone = renderer->GetDefaultZone();
-    default_zone->SetFogStart(1600);
-    default_zone->SetFogEnd(2000);
+    default_zone->SetFogStart(app->getFogStartDistance());
+    default_zone->SetFogEnd(app->getFogEndDistance());
     default_zone->SetFogColor(app->getFogColor());
     default_zone->SetAmbientColor(app->getAmbientLight());
 }

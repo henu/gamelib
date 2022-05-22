@@ -120,7 +120,17 @@ Urho3D::String App::getDefaultHost()
     return "localhost";
 }
 
-Urho3D::Color App::getFogColor()
+float App::getFogStartDistance() const
+{
+    return 1600;
+}
+
+float App::getFogEndDistance() const
+{
+    return 2000;
+}
+
+Urho3D::Color App::getFogColor() const
 {
     return Urho3D::Color::BLACK;
 }

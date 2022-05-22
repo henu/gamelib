@@ -38,7 +38,9 @@ public:
     virtual uint16_t getDefaultPort();
     virtual Urho3D::String getDefaultHost();
 
-    virtual Urho3D::Color getFogColor();
+    virtual float getFogStartDistance() const;
+    virtual float getFogEndDistance() const;
+    virtual Urho3D::Color getFogColor() const;
     virtual Urho3D::Color getAmbientLight();
 
     virtual Urho3D::Vector3 snapPosition(Urho3D::Vector3 const& pos);
