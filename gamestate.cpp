@@ -177,18 +177,21 @@ void GameState::handleUpdate(Urho3D::StringHash event_type, Urho3D::VariantMap& 
             controls.pitch_ = pitch;
             controls.Set(CTRL_FIRE, input->GetMouseButtonDown(Urho3D::MOUSEB_LEFT));
 
-            conn->SetControls(controls);
-
-            // Let possible GameObject in the controlled node set the camera transform
+            // Let possible GameObject in the controlled node modify the controls and set the camera transform
             Urho3D::Node* camera_node = getApp()->getScene()->GetChild("camera");
             for (unsigned i = 0; i < controlled_node->GetNumComponents(); ++ i) {
                 Urho3D::Component* component = controlled_node->GetComponents()[i];
                 GameObject* gameobj = dynamic_cast<GameObject*>(component);
                 if (gameobj) {
-                    camera_node->SetTransform(gameobj->getCameraTransform());
+                    gameobj->modifyControls(&controls);
+                    yaw = controls.yaw_;
+                    pitch = controls.pitch_;
+                    camera_node->SetTransform(gameobj->getCameraTransform(&controls));
                     break;
                 }
             }
+
+            conn->SetControls(controls);
         }
     }
 

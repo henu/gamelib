@@ -67,8 +67,14 @@ bool GameObject::receiveDecals() const
     return false;
 }
 
-Urho3D::Matrix3x4 GameObject::getCameraTransform() const
+void GameObject::modifyControls(Urho3D::Controls* controls) const
 {
+    (void)controls;
+}
+
+Urho3D::Matrix3x4 GameObject::getCameraTransform(Urho3D::Controls const* controls) const
+{
+    (void)controls;
     return Urho3D::Matrix3x4::IDENTITY;
 }
 

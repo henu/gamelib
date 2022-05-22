@@ -45,7 +45,9 @@ public:
 
     virtual bool receiveDecals() const;
 
-    virtual Urho3D::Matrix3x4 getCameraTransform() const;
+    virtual void modifyControls(Urho3D::Controls* controls) const;
+
+    virtual Urho3D::Matrix3x4 getCameraTransform(Urho3D::Controls const* controls) const;
 
     virtual Shape getPlacementShape() const;
 
