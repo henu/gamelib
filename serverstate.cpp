@@ -45,6 +45,10 @@ ServerState::ServerState(App* app, Urho3D::Context* context, uint16_t port) :
 
     app->initializeSceneOnServer();
 
+    if (app->isStopping()) {
+        return;
+    }
+
     // Subscribe to events
     SubscribeToEvent(Urho3D::E_CLIENTCONNECTED, URHO3D_HANDLER(ServerState, handleClientConnected));
     SubscribeToEvent(Urho3D::E_CLIENTDISCONNECTED, URHO3D_HANDLER(ServerState, handleClientDisconnected));

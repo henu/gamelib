@@ -25,6 +25,10 @@ public:
 
     bool isLocal() const;
 
+    void stop();
+
+    bool isStopping() const;
+
     virtual void initializeSceneOnServer();
     virtual void initializeSceneOnClient();
 

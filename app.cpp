@@ -81,6 +81,17 @@ bool App::isLocal() const
     return is_local;
 }
 
+void App::stop()
+{
+// TODO: Find out a way to load or clear all pending backround resources! Now it will cause a segfault sometimes...
+    engine_->Exit();
+}
+
+bool App::isStopping() const
+{
+    return engine_->IsExiting();
+}
+
 void App::initializeSceneOnServer()
 {
 }
