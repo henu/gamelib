@@ -36,7 +36,7 @@ GameState::GameState(App* app, Urho3D::Context* context, Urho3D::String const& h
     // Camera and listener
     Urho3D::Node* camera_node = app->getScene()->CreateChild("camera", Urho3D::LOCAL);
     Urho3D::Camera* camera = camera_node->CreateComponent<Urho3D::Camera>();
-    camera->SetFarClip(2100);
+    camera->SetFarClip(app->getFogEndDistance());
     Urho3D::SoundListener* listener = camera_node->CreateComponent<Urho3D::SoundListener>();
     GetSubsystem<Urho3D::Audio>()->SetListener(listener);
 

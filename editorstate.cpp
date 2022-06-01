@@ -32,7 +32,7 @@ EditorState::EditorState(App* app, Urho3D::Context* context, Urho3D::String cons
     camera_node->SetPosition(Urho3D::Vector3(0, 10, 0));
     camera_node->SetRotation(cam_control.getRotation());
     Urho3D::Camera* camera = camera_node->CreateComponent<Urho3D::Camera>();
-    camera->SetFarClip(2100);
+    camera->SetFarClip(app->getFogEndDistance());
 
     // Sun
     Urho3D::Node* sun_node = app->getScene()->CreateChild();
