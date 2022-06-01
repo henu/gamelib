@@ -288,6 +288,7 @@ void App::initWindow()
     engineParameters_["WindowWidth"] = 1280;
     engineParameters_["WindowHeight"] = 720;
     engineParameters_["WindowResizable"] = true;
+    engine_->SetMaxFps(60);
 }
 
 }
