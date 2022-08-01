@@ -14,6 +14,8 @@ extern const unsigned CTRL_FORWARD;
 extern const unsigned CTRL_BACKWARD;
 extern const unsigned CTRL_LEFT;
 extern const unsigned CTRL_RIGHT;
+extern const unsigned CTRL_JUMP;
+extern const unsigned CTRL_CROUCH;
 extern const unsigned CTRL_FIRE;
 extern const unsigned CTRL_ANY_MOVEMENT_KEY;
 
