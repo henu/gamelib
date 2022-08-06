@@ -150,22 +150,15 @@ void ServerState::handleUpdate(Urho3D::StringHash event_type, Urho3D::VariantMap
             Urho3D::Component* component = child_node->GetComponents()[j];
             GameObject* gameobj = dynamic_cast<GameObject*>(component);
             if (gameobj) {
-                if (player) {
-                    if (player->conn) {
-                        if (!gameobj->runServerSide(deltatime, &player->conn->GetControls())) {
-                            child_node->Remove();
-                            removed_nodes.Insert(child_node);
-                            node_was_destroyed = true;
-                            break;
-                        }
-                    }
-                } else {
-                    if (!gameobj->runServerSide(deltatime, NULL)) {
-                        child_node->Remove();
-                        removed_nodes.Insert(child_node);
-                        node_was_destroyed = true;
-                        break;
-                    }
+                Urho3D::Controls const* controls = nullptr;
+                if (player && player->conn) {
+                    controls = &player->conn->GetControls();
+                }
+                if (!gameobj->runServerSide(deltatime, controls)) {
+                    child_node->Remove();
+                    removed_nodes.Insert(child_node);
+                    node_was_destroyed = true;
+                    break;
                 }
             }
         }
