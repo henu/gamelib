@@ -53,6 +53,14 @@ ServerState::ServerState(App* app, Urho3D::Context* context, uint16_t port) :
     SubscribeToEvent(Urho3D::E_CLIENTCONNECTED, URHO3D_HANDLER(ServerState, handleClientConnected));
     SubscribeToEvent(Urho3D::E_CLIENTDISCONNECTED, URHO3D_HANDLER(ServerState, handleClientDisconnected));
 
+    // Subscribe to custom network events
+    Urho3D::Vector<Urho3D::StringHash> network_events;
+    app->getServerNetworkEvents(network_events);
+    for (auto network_event : network_events) {
+        SubscribeToEvent(network_event, URHO3D_HANDLER(ServerState, handleCustomNetworkEvent));
+        GetSubsystem<Urho3D::Network>()->RegisterRemoteEvent(network_event);
+    }
+
     // Start listening connections
     if (!GetSubsystem<Urho3D::Network>()->StartServer(port)) {
         throw std::runtime_error("Unable to start server!");
@@ -219,6 +227,14 @@ void ServerState::handleClientDisconnected(Urho3D::StringHash event_type, Urho3D
     }
     // Clean player
     players.erase(Urho3D::SharedPtr<Player>(player));
+}
+
+void ServerState::handleCustomNetworkEvent(Urho3D::StringHash event_type, Urho3D::VariantMap& event_data)
+{
+    // Get connection from event data
+    Urho3D::Connection* conn = static_cast<Urho3D::Connection*>(event_data[Urho3D::NetworkMessage::P_CONNECTION].GetPtr());
+
+    app->handleServerNetworkEvent(conn, event_type, event_data);
 }
 
 Player* ServerState::getPlayer(Urho3D::Connection* conn)

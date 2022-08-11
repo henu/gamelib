@@ -179,6 +179,16 @@ void GameState::handleUpdate(Urho3D::StringHash event_type, Urho3D::VariantMap& 
             controls.pitch_ = pitch;
             controls.Set(CTRL_FIRE, input->GetMouseButtonDown(Urho3D::MOUSEB_LEFT));
 
+            if (input->GetMouseButtonPress(Urho3D::MOUSEB_LEFT)) {
+                getApp()->handleMouseButtonPress(Urho3D::MOUSEB_LEFT);
+            }
+            if (input->GetMouseButtonPress(Urho3D::MOUSEB_RIGHT)) {
+                getApp()->handleMouseButtonPress(Urho3D::MOUSEB_RIGHT);
+            }
+            if (input->GetMouseButtonPress(Urho3D::MOUSEB_MIDDLE)) {
+                getApp()->handleMouseButtonPress(Urho3D::MOUSEB_MIDDLE);
+            }
+
             // Let possible GameObject in the controlled node modify the controls and set the camera transform
             Urho3D::Node* camera_node = getApp()->getScene()->GetChild("camera");
             for (unsigned i = 0; i < controlled_node->GetNumComponents(); ++ i) {

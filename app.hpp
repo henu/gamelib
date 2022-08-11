@@ -5,6 +5,7 @@
 
 #include <Urho3D/Engine/Application.h>
 #include <Urho3D/Graphics/Material.h>
+#include <Urho3D/Input/InputConstants.h>
 #include <Urho3D/Scene/Scene.h>
 
 namespace GameLib
@@ -34,10 +35,14 @@ public:
 
     virtual void stepOnClient(float deltatime);
 
+    virtual void handleMouseButtonPress(Urho3D::MouseButton mouse_button);
+
     virtual Urho3D::Node* createNodeAndGameObjectForPlayer();
 
     virtual void getClientNetworkEvents(Urho3D::Vector<Urho3D::StringHash>& result);
     virtual void handleClientNetworkEvent(Urho3D::StringHash const& event_type, Urho3D::VariantMap& event_data);
+    virtual void getServerNetworkEvents(Urho3D::Vector<Urho3D::StringHash>& result);
+    virtual void handleServerNetworkEvent(Urho3D::Connection* conn, Urho3D::StringHash const& event_type, Urho3D::VariantMap& event_data);
 
     virtual uint16_t getDefaultPort();
     virtual Urho3D::String getDefaultHost();

@@ -105,6 +105,11 @@ void App::stepOnClient(float deltatime)
     (void)deltatime;
 }
 
+void App::handleMouseButtonPress(Urho3D::MouseButton mouse_button)
+{
+    (void)mouse_button;
+}
+
 Urho3D::Node* App::createNodeAndGameObjectForPlayer()
 {
     return NULL;
@@ -117,6 +122,18 @@ void App::getClientNetworkEvents(Urho3D::Vector<Urho3D::StringHash>& result)
 
 void App::handleClientNetworkEvent(Urho3D::StringHash const& event_type, Urho3D::VariantMap& event_data)
 {
+    (void)event_type;
+    (void)event_data;
+}
+
+void App::getServerNetworkEvents(Urho3D::Vector<Urho3D::StringHash>& result)
+{
+    (void)result;
+}
+
+void App::handleServerNetworkEvent(Urho3D::Connection* conn, Urho3D::StringHash const& event_type, Urho3D::VariantMap& event_data)
+{
+    (void)conn;
     (void)event_type;
     (void)event_data;
 }

@@ -51,6 +51,8 @@ private:
     void handleClientDisconnected(Urho3D::StringHash event_type, Urho3D::VariantMap& event_data);
     void handleSetPlayerName(Urho3D::StringHash event_type, Urho3D::VariantMap& event_data);
 
+    void handleCustomNetworkEvent(Urho3D::StringHash event_type, Urho3D::VariantMap& event_data);
+
     Player* getPlayer(Urho3D::Connection* conn);
 };
 
