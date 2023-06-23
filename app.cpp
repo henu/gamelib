@@ -1,8 +1,9 @@
 #include "app.hpp"
 
 #include "gamestate.hpp"
-#include "serverstate.hpp"
 #include "editorstate.hpp"
+#include "serverstate.hpp"
+#include "spectatorghost.hpp"
 
 #include "../urhoextras/mathutils.hpp"
 
@@ -21,6 +22,8 @@ App::App(Urho3D::Context* context) :
     arg_client_port(0),
     gamestate(NULL)
 {
+    SpectatorGhost::registerObject(context);
+
     try {
         readArguments();
     } catch (std::runtime_error const& err) {
@@ -112,7 +115,11 @@ void App::handleMouseButtonPress(Urho3D::MouseButton mouse_button)
 
 Urho3D::Node* App::createNodeAndGameObjectForPlayer()
 {
-    return NULL;
+    // Create a simple spectator ghost that can move around, but is not visible and cannot collide with anything.
+    Urho3D::Node* node = getScene()->CreateChild();
+    SpectatorGhost* ghost = node->CreateComponent<SpectatorGhost>();
+    ghost->finishCreation(this);
+    return node;
 }
 
 void App::getClientNetworkEvents(Urho3D::Vector<Urho3D::StringHash>& result)
