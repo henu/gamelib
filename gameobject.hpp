@@ -22,6 +22,12 @@ public:
     GameObject(Urho3D::Context* context);
     virtual ~GameObject();
 
+    // Sets if this GameObject is interested about physics collisions. This only
+    // happens on server side and by default GameObjects are not interested.
+    void setHandlesPhysicsCollisions(bool handles_physics_collisions);
+
+    bool getHandlesPhysicsCollisions() const;
+
     // Called on client by GameState
     void setApp(App* app);
 
@@ -43,6 +49,8 @@ public:
 
     virtual void handleExplosion(Urho3D::Vector3 const& pos);
 
+    virtual void handlePhysicsCollision(Urho3D::Vector3 const& pos, Urho3D::Vector3 const& normal, float distance, Urho3D::Node* node, GameObject* obj);
+
     virtual bool receiveDecals() const;
 
     virtual void modifyControls(Urho3D::Controls* controls) const;
@@ -63,6 +71,7 @@ private:
 
     App* app;
 
+    bool handles_physics_collisions;
 };
 
 }

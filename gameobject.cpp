@@ -8,12 +8,23 @@ namespace GameLib
 
 GameObject::GameObject(Urho3D::Context* context) :
     Urho3D::Component(context),
-    app(nullptr)
+    app(nullptr),
+    handles_physics_collisions(false)
 {
 }
 
 GameObject::~GameObject()
 {
+}
+
+void GameObject::setHandlesPhysicsCollisions(bool handles_physics_collisions)
+{
+    this->handles_physics_collisions = handles_physics_collisions;
+}
+
+bool GameObject::getHandlesPhysicsCollisions() const
+{
+    return handles_physics_collisions;
 }
 
 void GameObject::setApp(App* app)
@@ -60,6 +71,15 @@ bool GameObject::handleHitscan(Urho3D::Vector3 const& pos, Urho3D::Vector3 const
 void GameObject::handleExplosion(Urho3D::Vector3 const& pos)
 {
     (void)pos;
+}
+
+void GameObject::handlePhysicsCollision(Urho3D::Vector3 const& pos, Urho3D::Vector3 const& normal, float distance, Urho3D::Node* node, GameObject* obj)
+{
+    (void)pos;
+    (void)normal;
+    (void)distance;
+    (void)node;
+    (void)obj;
 }
 
 bool GameObject::receiveDecals() const

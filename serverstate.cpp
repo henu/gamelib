@@ -9,8 +9,10 @@
 #include <Urho3D/Graphics/Model.h>
 #include <Urho3D/Input/Input.h>
 #include <Urho3D/IO/Log.h>
+#include <Urho3D/IO/MemoryBuffer.h>
 #include <Urho3D/Network/Network.h>
 #include <Urho3D/Network/NetworkEvents.h>
+#include <Urho3D/Physics/PhysicsEvents.h>
 #include <Urho3D/Physics/PhysicsWorld.h>
 #include <Urho3D/Resource/ResourceCache.h>
 
@@ -52,6 +54,7 @@ ServerState::ServerState(App* app, Urho3D::Context* context, uint16_t port) :
     // Subscribe to events
     SubscribeToEvent(Urho3D::E_CLIENTCONNECTED, URHO3D_HANDLER(ServerState, handleClientConnected));
     SubscribeToEvent(Urho3D::E_CLIENTDISCONNECTED, URHO3D_HANDLER(ServerState, handleClientDisconnected));
+    SubscribeToEvent(Urho3D::E_PHYSICSCOLLISION, URHO3D_HANDLER(ServerState, handlePhysicsCollision));
 
     // Subscribe to custom network events
     Urho3D::Vector<Urho3D::StringHash> network_events;
@@ -227,6 +230,71 @@ void ServerState::handleClientDisconnected(Urho3D::StringHash event_type, Urho3D
     }
     // Clean player
     players.erase(Urho3D::SharedPtr<Player>(player));
+}
+
+void ServerState::handlePhysicsCollision(Urho3D::StringHash event_type, Urho3D::VariantMap& event_data)
+{
+    (void)event_type;
+
+    // Get nodes
+    Urho3D::Node* original_node_a = dynamic_cast<Urho3D::Node*>(event_data[Urho3D::PhysicsCollision::P_NODEA].GetPtr());
+    Urho3D::Node* original_node_b = dynamic_cast<Urho3D::Node*>(event_data[Urho3D::PhysicsCollision::P_NODEB].GetPtr());
+    Urho3D::Node* node_a = original_node_a;
+    Urho3D::Node* node_b = original_node_b;
+
+    // Try to find GameObjects
+    GameObject* obj_a = nullptr;
+    GameObject* obj_b = nullptr;
+    while (!obj_a && node_a) {
+        auto comps = node_a->GetComponents();
+        for (Urho3D::Component* comp : comps) {
+            obj_a = dynamic_cast<GameObject*>(comp);
+            if (obj_a) break;
+        }
+        if (!obj_a) {
+            node_a = node_a->GetParent();
+        }
+    }
+    while (!obj_b && node_b) {
+        auto comps = node_b->GetComponents();
+        for (Urho3D::Component* comp : comps) {
+            obj_b = dynamic_cast<GameObject*>(comp);
+            if (obj_b) break;
+        }
+        if (!obj_b) {
+            node_b = node_b->GetParent();
+        }
+    }
+
+    // If no GameObjects were got, or none of them is interested about collisions, then stop here
+    if ((!obj_a || !obj_a->getHandlesPhysicsCollisions()) && (!obj_b || !obj_b->getHandlesPhysicsCollisions())) {
+        return;
+    }
+
+    // If another of the GameObjects were not found, then restore its Node to original one
+    if (!obj_a) {
+        node_a = original_node_a;
+    }
+    if (!obj_b) {
+        node_b = original_node_b;
+    }
+
+    // Iterate contacts
+    Urho3D::MemoryBuffer contacts(event_data[Urho3D::PhysicsCollision::P_CONTACTS].GetBuffer());
+    while (!contacts.IsEof()) {
+        // Read contact data
+        Urho3D::Vector3 pos = contacts.ReadVector3();
+        Urho3D::Vector3 normal = contacts.ReadVector3();
+        float distance = contacts.ReadFloat();
+        contacts.ReadFloat(); // Impulse
+        // Make a callback to GameObject(s)
+        if (obj_a && obj_a->getHandlesPhysicsCollisions()) {
+            obj_a->handlePhysicsCollision(pos, normal, distance, node_b, obj_b);
+        }
+        if (obj_b && obj_b->getHandlesPhysicsCollisions()) {
+            obj_b->handlePhysicsCollision(pos, -normal, distance, node_a, obj_a);
+        }
+    }
 }
 
 void ServerState::handleCustomNetworkEvent(Urho3D::StringHash event_type, Urho3D::VariantMap& event_data)

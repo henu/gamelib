@@ -49,6 +49,7 @@ private:
     void handleUpdate(Urho3D::StringHash event_type, Urho3D::VariantMap& event_data);
     void handleClientConnected(Urho3D::StringHash event_type, Urho3D::VariantMap& event_data);
     void handleClientDisconnected(Urho3D::StringHash event_type, Urho3D::VariantMap& event_data);
+    void handlePhysicsCollision(Urho3D::StringHash event_type, Urho3D::VariantMap& event_data);
     void handleSetPlayerName(Urho3D::StringHash event_type, Urho3D::VariantMap& event_data);
 
     void handleCustomNetworkEvent(Urho3D::StringHash event_type, Urho3D::VariantMap& event_data);
