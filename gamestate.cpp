@@ -170,6 +170,7 @@ void GameState::handleUpdate(Urho3D::StringHash event_type, Urho3D::VariantMap& 
             controls.Set(CTRL_RIGHT, input->GetKeyDown(Urho3D::KEY_D));
             controls.Set(CTRL_JUMP, input->GetKeyDown(Urho3D::KEY_SPACE));
             controls.Set(CTRL_CROUCH, input->GetKeyDown(Urho3D::KEY_LCTRL));
+            controls.Set(CTRL_RUN, input->GetKeyDown(Urho3D::KEY_LSHIFT));
 
             // Read mouse
             Urho3D::IntVector2 mouse_move = input->GetMouseMove();
